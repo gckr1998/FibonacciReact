@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t chandu/complexdocker -f ./client/Dockerfile.dev ./client
+scripts:
+  - docker run chandu/complexdocker npm test -- --coverage
+
+after_success:
+  - docker build -t chandu/multi-client ./client
+  - docker build -t chandu/multi-nginx ./nginx
+  - docker build -t chandu/multi-server ./server
+  - docker build -t chandu/multi-worker ./worker
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push chandu/multi-client
+  - docker push chandu/multi-nginx
+  - docker push chandu/multi-server
+  - docker push chandu/multi-worker
